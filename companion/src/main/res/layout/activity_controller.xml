@@ -6,13 +6,86 @@
     android:layout_height="match_parent"
     tools:context=".ControllerActivity">
 
-    <Button
-        android:id="@+id/upBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="UP"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
+
+        <android.support.constraint.Guideline
+            android:id="@+id/vertical1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.33" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/vertical2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.66" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/horizontal1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.33" />
+
+        <android.support.constraint.Guideline
+            android:id="@+id/horizontal2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.66" />
+
+        <Button
+            android:id="@+id/forwardBtn"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="Forward"
+            app:layout_constraintBottom_toTopOf="@+id/horizontal1"
+            app:layout_constraintEnd_toStartOf="@+id/vertical2"
+            app:layout_constraintStart_toStartOf="@+id/vertical1"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/rightBtn"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="Right"
+            app:layout_constraintBottom_toTopOf="@+id/horizontal2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/vertical2"
+            app:layout_constraintTop_toTopOf="@+id/horizontal1" />
+
+        <Button
+            android:id="@+id/leftBtn"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="Left"
+            app:layout_constraintBottom_toTopOf="@+id/horizontal2"
+            app:layout_constraintEnd_toStartOf="@+id/vertical1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/horizontal1" />
+
+        <Button
+            android:id="@+id/backBtn"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:text="BACK"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/vertical2"
+            app:layout_constraintStart_toStartOf="@+id/vertical1"
+            app:layout_constraintTop_toTopOf="@+id/horizontal2" />
+    </android.support.constraint.ConstraintLayout>
 </android.support.constraint.ConstraintLayout>
