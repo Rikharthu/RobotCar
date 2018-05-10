@@ -5,8 +5,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
 import android.support.v7.app.AppCompatActivity
-import android.view.MotionEvent
-import android.view.View
+import com.example.rikharthu.companion.views.DpadView
 import kotlinx.android.synthetic.main.activity_controller.*
 import timber.log.Timber
 import java.net.InetSocketAddress
@@ -20,7 +19,6 @@ class ControllerActivity : AppCompatActivity() {
     private lateinit var networkHandler: Handler
     private lateinit var channel: DatagramChannel
     private lateinit var address: InetSocketAddress
-    private var currentPressedBtn: View? = null
     private lateinit var timer: Timer
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,23 +33,6 @@ class ControllerActivity : AppCompatActivity() {
         networkHandler = Handler(networkThread.looper)
         channel = DatagramChannel.open()
         address = InetSocketAddress(serviceInfo.host.hostAddress, serviceInfo.port)
-
-        forwardBtn.setOnTouchListener { v, event ->
-            onButtonTouchEvent(v, event)
-            true
-        }
-        leftBtn.setOnTouchListener { v, event ->
-            onButtonTouchEvent(v, event)
-            true
-        }
-        rightBtn.setOnTouchListener { v, event ->
-            onButtonTouchEvent(v, event)
-            true
-        }
-        backBtn.setOnTouchListener { v, event ->
-            onButtonTouchEvent(v, event)
-            true
-        }
     }
 
     override fun onResume() {
@@ -59,20 +40,20 @@ class ControllerActivity : AppCompatActivity() {
         val timerTask = object : TimerTask() {
             override fun run() {
                 // TODO refactor, since these kotlin syncx use findViewById all the time
-                when (currentPressedBtn) {
-                    forwardBtn -> {
+                when (dpadView.currentSector) {
+                    DpadView.UP -> {
                         Timber.d("forward")
                         send(RobotConstants.COMMAND_FORWARD)
                     }
-                    leftBtn -> {
+                    DpadView.LEFT -> {
                         Timber.d("left")
                         send(RobotConstants.COMMAND_LEFT)
                     }
-                    rightBtn -> {
+                    DpadView.RIGHT -> {
                         Timber.d("right")
                         send(RobotConstants.COMMAND_RIGHT)
                     }
-                    backBtn -> {
+                    DpadView.DOWN -> {
                         Timber.d("back")
                         send(RobotConstants.COMMAND_BACK)
                     }
@@ -90,18 +71,6 @@ class ControllerActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         timer.cancel()
-    }
-
-    private fun onButtonTouchEvent(view: View, event: MotionEvent) {
-        if (event.action == MotionEvent.ACTION_DOWN) {
-            Timber.d("Selected")
-            currentPressedBtn = view
-        } else if (event.action == MotionEvent.ACTION_UP) {
-            if (currentPressedBtn == view) {
-                Timber.d("Releasing")
-                currentPressedBtn = null
-            }
-        }
     }
 
     fun send(data: ByteArray) {
