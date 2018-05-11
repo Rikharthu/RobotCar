@@ -1,5 +1,6 @@
 package com.example.rikharthu.companion.views
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
@@ -39,17 +40,31 @@ class DpadView : View {
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int, defStyleRes: Int) : super(context, attrs, defStyleAttr, defStyleRes)
 
+    init {
+        setLayerType(LAYER_TYPE_HARDWARE, paint)
+    }
+
+    @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
-        canvas.drawCircle(newX, newY, 20f, paint.apply {
-            color = Color.RED
-            style = Paint.Style.FILL
-        })
-        canvas.drawCircle(centerX, centerY, 20f, paint.apply { color = Color.CYAN })
-        canvas.drawCircle(centerX, centerY, borderRadius, paint.apply {
-            color = Color.BLACK
-            strokeWidth = 2f
-            style = Paint.Style.STROKE
-        })
+        val bmp = Bitmap.createBitmap(canvas.width, canvas.height, Bitmap.Config.ARGB_8888) // TODO use other format
+        val overlayCanvas = Canvas(bmp)
+        // Guidelines
+        val limitLine = Path()
+        paint.strokeWidth = 16f
+        paint.style = Paint.Style.STROKE
+        paint.color = Color.RED
+        limitLine.moveTo(centerX + centerRadius, centerY)
+        limitLine.lineTo(centerX + borderRadius, centerY)
+        val _matrix = Matrix().apply { setRotate(-45f, centerX, centerY) }
+        limitLine.transform(_matrix)
+        _matrix.setRotate(-90f, centerX, centerY)
+        for (i in 1..4) {
+            overlayCanvas.drawPath(limitLine, paint)
+            limitLine.transform(_matrix)
+        }
+        // Circles
+        overlayCanvas.drawCircle(centerX, centerY, centerRadius, paint)
+        overlayCanvas.drawCircle(centerX, centerY, borderRadius, paint)
 
         val distShort = centerRadius * sqrt(2f) / 2
         val distLong = borderRadius * sqrt(2f) / 2
@@ -62,16 +77,10 @@ class DpadView : View {
         val x4 = centerX - distShort
         val y4 = centerY - distShort
 
-        canvas.drawCircle(x1, y1, 5f, paint)
-        canvas.drawCircle(x2, y2, 5f, paint)
-        canvas.drawCircle(x3, y3, 5f, paint)
-        canvas.drawCircle(x4, y4, 5f, paint)
-
         val outerBorder = RectF()
         val centerBorder = RectF()
         outerBorder.set(centerX - borderRadius, centerY - borderRadius, centerX + borderRadius, centerY + borderRadius)
         centerBorder.set(centerX - centerRadius, centerY - centerRadius, centerX + centerRadius, centerY + centerRadius)
-        canvas.drawRect(outerBorder, paint.apply { color = Color.CYAN })
 
         val path = Path()
         path.moveTo(x1, y1)
@@ -83,26 +92,57 @@ class DpadView : View {
         path.moveTo(x1, y1)
         path.close()
 
+        paint.style = Paint.Style.FILL_AND_STROKE
+        paint.strokeWidth = 1f
+        paint.isAntiAlias = true
         canvas.drawPath(path, paint.apply {
-            strokeWidth = 10f
-            color = Color.BLUE
-            style = if (currentSector == UP) {
-                Paint.Style.FILL
+            color = if (currentSector == UP) {
+                Color.LTGRAY
             } else {
-                Paint.Style.STROKE
+                Color.GRAY
+            }
+        })
+        path.transform(Matrix().apply { preRotate(90f, centerX, centerY) })
+        canvas.drawPath(path, paint.apply {
+            color = if (currentSector == RIGHT) {
+                Color.LTGRAY
+            } else {
+                Color.GRAY
+            }
+        })
+        path.transform(Matrix().apply { preRotate(180f, centerX, centerY) })
+        canvas.drawPath(path, paint.apply {
+            color = if (currentSector == LEFT) {
+                Color.LTGRAY
+            } else {
+                Color.GRAY
+            }
+        })
+        path.transform(Matrix().apply { preRotate(-90f, centerX, centerY) })
+        canvas.drawPath(path, paint.apply {
+            color = if (currentSector == DOWN) {
+                Color.LTGRAY
+            } else {
+                Color.GRAY
             }
         })
 
         // Center
         canvas.drawCircle(centerX, centerY, centerRadius, paint.apply {
-            style = if (currentSector == CENTER) Paint.Style.FILL else Paint.Style.STROKE
+            color = if (currentSector == CENTER) {
+                Color.LTGRAY
+            } else {
+                Color.GRAY
+            }
         })
+
+        canvas.drawBitmap(bmp, 0f, 0f, Paint().apply { xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_OUT) })
 
         super.onDraw(canvas)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        var newSector = currentSector
+        var newSector: Int
         if (event.action == MotionEvent.ACTION_UP) {
             // Released
             newX = centerX
